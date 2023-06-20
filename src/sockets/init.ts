@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+
 function initSocket(io: Server) {
   io.on("connection", (socket) => {
     console.log("a user connected");
