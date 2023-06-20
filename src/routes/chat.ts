@@ -5,7 +5,7 @@ import authorizer from "./../middlewares/authorizer";
 const router = Router();
 
 //TODO: Auth
-router.get("/", authorizer, async (req, res) => {
+router.get("/", authorizer.authorize, async (req, res) => {
   const { user_id, chat_id } = req.query || {};
   const chats = await Chat.findAll({
     where: {
