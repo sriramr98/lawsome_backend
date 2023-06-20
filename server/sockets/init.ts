@@ -5,6 +5,11 @@ interface UserSocket extends Socket {
   user?: any;
 }
 
+interface SocketMessage {
+  msg: string;
+  chat_id: string;
+}
+
 function initSocket(io: Server) {
   io.use(async (socket: UserSocket, next) => {
     const { token } = socket.handshake.auth || {};
@@ -25,6 +30,11 @@ function initSocket(io: Server) {
   io.on("connection", (socket: UserSocket) => {
     const user = socket.user;
     console.log("user connected", user);
+
+    socket.on("chat:msg", (msg: SocketMessage) => {
+      console.log("chat:msg", msg);
+      socket.send(msg);
+    });
   });
 
   io.on("disconnect", () => {
