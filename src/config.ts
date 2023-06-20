@@ -6,4 +6,7 @@ export default {
     host: process.env.SQL_HOST || "localhost",
     port: process.env.SQL_PORT || 5432,
   },
+  firebase: {
+    databaseURL: process.env.FIREBASE_DATABASE_URL || "",
+  },
 };
