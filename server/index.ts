@@ -1,7 +1,9 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import dotenv from "dotenv";
 
+dotenv.config();
 import initRoutes from "./routes/init";
 import initSocket from "./sockets/init";
 import initFirebase from "./config/firebase";

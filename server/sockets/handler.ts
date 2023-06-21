@@ -3,6 +3,7 @@ import { Server, Socket } from "socket.io";
 import authorizer from './../middlewares/authorizer'
 import { SocketMessage, UserSocket } from './types'
 import chatRepo from './../repo/chat';
+import ai from './../core/ai'
 
 async function onNewConnection(socket: UserSocket, next: any) {
     // const { token } = socket.handshake.auth || {};
@@ -25,16 +26,19 @@ async function onNewConnection(socket: UserSocket, next: any) {
 function getNewChatMsgHandler(socket: UserSocket) {
   return async function(msg: SocketMessage) {
     // Fetch chat History
+    console.log('fetching chat history..')
     const chat_history = await chatRepo.getChatHistory(socket.user.user_id, msg.chat_id)
 
+    console.log('chatting with aI...')
     // chat with AI
-    const resp = await chatWithAI(chat_history)
+    const resp = await ai.chatWithAI(chat_history, msg.msg)
 
+    console.log('updating chat history...')
     // update chat history
-    await chatRepo.addNewChatResponse(socket.user.user_id, msg.chat_id, resp)
+    await chatRepo.addNewChatResponse(socket.user.user_id, msg.chat_id, resp.msg, msg.msg)
 
     // Send response to client
-    socket.emit('chat:resp', { msg, user: socket.user })
+    socket.emit('chat:resp', { question: msg.msg, answer: resp.msg })
   }
 }
 
