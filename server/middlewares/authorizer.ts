@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 async function extractUserFromToken(token: string) {
   try {
     const user = await admin.auth().verifyIdToken(token, true);
-    console.log({ user });
+    console.log(JSON.stringify(user))
     return user;
   } catch (e: any) {
     return null;
