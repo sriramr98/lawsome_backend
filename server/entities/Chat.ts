@@ -3,15 +3,18 @@ import getSequelize from "./init";
 
 const sql = getSequelize();
 
-const Chat = sql.define("chat", {
+const ChatMessage = sql.define("chat_message", {
   id: {
     type: DataTypes.STRING,
     primaryKey: true,
   },
+  chat_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   user_id: {
     type: DataTypes.STRING,
     allowNull: false,
-    primaryKey: true,
   },
   sender: {
     type: DataTypes.STRING,
@@ -23,4 +26,4 @@ const Chat = sql.define("chat", {
   },
 });
 
-export default Chat;
+export default ChatMessage;
