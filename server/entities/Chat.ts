@@ -5,8 +5,9 @@ const sql = getSequelize();
 
 const ChatMessage = sql.define("chat_message", {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     primaryKey: true,
+    autoIncrement: true,
   },
   chat_id: {
     type: DataTypes.STRING,

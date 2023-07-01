@@ -11,3 +11,6 @@ firebase**.json
 
 .env
 .vscode/**
+
+dist/
+mysql/

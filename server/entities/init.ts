@@ -12,6 +12,11 @@ export default function getSequelize() {
       {
         host: config.db.host,
         dialect: "mysql",
+        dialectOptions: {
+          ssl: {
+            rejectUnauthorized: true,
+          }
+        }
       }
     );
   }

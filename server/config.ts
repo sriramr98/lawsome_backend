@@ -4,7 +4,8 @@ export default {
     username: process.env.SQL_USERNAME || "root",
     password: process.env.SQL_PASSWORD || "root",
     host: process.env.SQL_HOST || "localhost",
-    port: process.env.SQL_PORT || 5432,
+    port: process.env.SQL_PORT || 3306,
+    uri: process.env.SQL_URI || "",
   },
   firebase: {
     databaseURL: process.env.FIREBASE_DATABASE_URL || "",
