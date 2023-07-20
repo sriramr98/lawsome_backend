@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConvoModule } from './convo/convo.module';
+import { ConvoModule } from './core/convo/convo.module';
 
 @Module({
     imports: [ConvoModule],
