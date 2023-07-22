@@ -24,7 +24,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         if (exception instanceof HttpException) {
             const resp = exception.getResponse() as InbuiltExceptionResponse;
             error = {
-                message: resp.message[0],
+                message:
+                    resp.message instanceof Array
+                        ? resp.message[0]
+                        : resp.message,
             };
             status = exception.getStatus();
         } else {
