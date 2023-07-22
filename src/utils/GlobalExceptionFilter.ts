@@ -21,6 +21,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
         let error: AppError;
         let status = HttpStatus.INTERNAL_SERVER_ERROR;
+        console.error(exception);
         if (exception instanceof HttpException) {
             const resp = exception.getResponse() as InbuiltExceptionResponse;
             error = {
