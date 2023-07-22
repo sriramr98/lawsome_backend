@@ -9,7 +9,6 @@ export class Firebase {
     constructor(private config: ConfigService) {
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount as ServiceAccount),
-            databaseURL: config.get('firebase.databaseURL'),
         });
     }
 

@@ -22,6 +22,7 @@ export class AuthGuard implements CanActivate {
             const user = await this.firebase.extractUser(token);
             request['user'] = user;
         } catch (error) {
+            console.log(error);
             throw new UnauthorizedException('Unable to Authorize user');
         }
 
