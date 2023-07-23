@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Conversation } from './entities/Conversation';
 import { Chat } from './entities/Chats';
-import { CreateConvoDto } from './dto/CreateConvo.dto';
 
 @Injectable()
 export class ConvoService {

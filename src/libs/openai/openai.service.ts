@@ -5,7 +5,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Chat } from 'src/core/convo/entities/Chats';
 import { QuestionContext } from 'src/types/QuestionContext';
 import { QA_PROMPT } from './prompts';
-import { Observable, from } from 'rxjs';
+import { Observable } from 'rxjs';
 
 interface TokenCallback {
     onNewToken(token: string): void;
@@ -48,13 +48,20 @@ export class OpenaiService implements OnModuleInit {
             prompt: QA_PROMPT,
         });
 
-        const formattedContext = context.map((c) => c.content).join('\n----\n');
+        const formattedContext = context
+            .map(
+                (c) =>
+                    `${c.metadata['act_id']}-${c.metadata['db_id']} : ${c.content}`,
+            )
+            .join('\n----\n');
+
+        console.log({ formattedContext });
 
         return new Observable((subscriber) => {
             chain.call(
                 {
                     question,
-                    context: formattedContext,
+                    sources: formattedContext,
                     conversationHistory: chat_history,
                 },
                 [

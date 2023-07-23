@@ -17,13 +17,7 @@ interface InbuiltExceptionResponse {
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost) {
-        console.log(host.getType());
-        switch (host.getType()) {
-            case 'ws':
-                return this.handleWsException(exception, host.switchToWs());
-            default:
-                return this.handleHttpException(exception, host.switchToHttp());
-        }
+        return this.handleHttpException(exception, host.switchToHttp());
     }
 
     private handleHttpException(exception: unknown, http: HttpArgumentsHost) {
@@ -47,16 +41,5 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         }
 
         return response.status(status).json(Result.failure(error));
-    }
-
-    private handleWsException(exception: unknown, ws: WsArgumentsHost) {
-        console.log('ws exception');
-        console.log(exception);
-        const client = ws.getClient();
-        const error: AppError = {
-            message: 'Internal server error',
-        };
-
-        client.emit('error', Result.failure(error));
     }
 }

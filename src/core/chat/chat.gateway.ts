@@ -52,6 +52,7 @@ export class ChatGateway implements OnGatewayConnection {
             msg,
         );
 
+        let finalAnswer = '';
         subscriber.subscribe({
             next: (token) => {
                 client.emit('chat:resp', {
@@ -59,10 +60,11 @@ export class ChatGateway implements OnGatewayConnection {
                     conversation_id,
                     isLast: false,
                 });
+                finalAnswer += token;
             },
             complete: () => {
                 client.emit('chat:resp', {
-                    msg: '',
+                    msg: finalAnswer,
                     conversation_id,
                     isLast: true,
                 });
