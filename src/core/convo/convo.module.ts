@@ -5,6 +5,6 @@ import { ConvoService } from './convo.service';
 
 @Module({
     controllers: [ConvoController],
-    providers: [Firebase, ConvoService],
+    providers: [ConvoService],
 })
 export class ConvoModule {}

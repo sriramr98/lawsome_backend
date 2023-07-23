@@ -1,47 +1,66 @@
 import {
     CanActivate,
     ExecutionContext,
+    Inject,
     Injectable,
     UnauthorizedException,
 } from '@nestjs/common';
 import { Firebase } from '../common/firebase.service';
+import { FirebaseUser } from 'src/types/FirebaseUser';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(private firebase: Firebase) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const request = context.switchToHttp().getRequest();
-        const token = this.extractToken(request);
+        const token = this.extractToken(context);
+        const user = await this.validateToken(token, 'http');
 
-        if (!token) {
-            throw new UnauthorizedException('Invalid Token');
+        this.addUserToContext(context, user);
+        return true;
+    }
+
+    async validateToken(
+        authToken: string,
+        type: string,
+    ): Promise<FirebaseUser> {
+        if (!authToken) {
+            this.throwError('Missing authorization token', type);
+        }
+
+        const [bearer, token] = authToken.split(' ');
+
+        if (bearer !== 'Bearer') {
+            this.throwError('Invalid authorization token type', type);
         }
 
         try {
             const user = await this.firebase.extractUser(token);
-            request['user'] = user;
+            return user;
         } catch (error) {
-            console.log(error);
-            throw new UnauthorizedException('Unable to Authorize user');
+            this.throwError('Invalid authorization token', type);
         }
-
-        return true;
     }
 
-    private extractToken(request: Request): string {
-        const authorizationToken = request.headers['authorization'];
+    private extractToken(context: ExecutionContext): string {
+        const headers = context.switchToHttp().getRequest().headers;
 
-        if (!authorizationToken) {
-            throw new UnauthorizedException('Missing authorization token');
-        }
+        const authorizationToken = headers['authorization'];
 
-        const [bearer, token] = authorizationToken.split(' ');
+        return authorizationToken;
+    }
 
-        if (bearer !== 'Bearer') {
-            throw new UnauthorizedException('Invalid authorization token type');
-        }
+    private throwError(message: string, type: string) {
+        const ex =
+            type === 'ws'
+                ? new WsException(message)
+                : new UnauthorizedException(message);
+        throw ex;
+    }
 
-        return token;
+    private addUserToContext(context: ExecutionContext, user: any) {
+        const request = context.switchToHttp().getRequest();
+        request.user = user;
     }
 }

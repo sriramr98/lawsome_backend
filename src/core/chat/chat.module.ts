@@ -4,9 +4,11 @@ import { ChatService } from './chat.service';
 import { ConvoService } from '../convo/convo.service';
 import { PineconeService } from 'src/libs/pinecone/pinecone.service';
 import { OpenaiService } from 'src/libs/openai/openai.service';
+import { AuthGuard } from '../auth/AuthGuard';
 
 @Module({
     providers: [
+        AuthGuard,
         ChatGateway,
         ChatService,
         ConvoService,

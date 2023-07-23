@@ -6,16 +6,15 @@ import {
     HttpStatus,
     Param,
     Post,
-    Res,
     UseGuards,
     UsePipes,
     ValidationPipe,
 } from '@nestjs/common';
 import { CreateConvoDto } from './dto/CreateConvo.dto';
 import Result from 'src/types/Result';
-import { AuthorizedUser } from 'src/core/auth/AuthorizedUser.decorator';
-import { AuthGuard } from '../auth/AuthGuard';
+import { AuthorizedUser } from 'src/core/auth/AuthorizedHttpUser.decorator';
 import { ConvoService } from './convo.service';
+import { AuthGuard } from '../auth/AuthGuard';
 
 @Controller('convo')
 @UseGuards(AuthGuard)

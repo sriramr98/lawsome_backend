@@ -8,6 +8,7 @@ import { Chat } from './core/convo/entities/Chats';
 import { ChatModule } from './core/chat/chat.module';
 import { OpenaiService } from './libs/openai/openai.service';
 import { Firebase } from './core/common/firebase.service';
+import { FirebaseModule } from './core/common/firebase.module';
 
 @Module({
     imports: [
@@ -35,6 +36,7 @@ import { Firebase } from './core/common/firebase.service';
                 },
             }),
         }),
+        FirebaseModule,
         ConvoModule,
         ChatModule,
     ],

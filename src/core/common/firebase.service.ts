@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Global, Injectable } from '@nestjs/common';
 import admin, { ServiceAccount } from 'firebase-admin';
 import * as serviceAccount from './../../../firebase-conf.json';
 import { ConfigService } from '@nestjs/config';
 import { FirebaseUser } from 'src/types/FirebaseUser';
 
+@Global()
 @Injectable()
 export class Firebase {
     constructor(private config: ConfigService) {
