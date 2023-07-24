@@ -34,6 +34,7 @@ export class ConvoController {
         @AuthorizedUser('uid') userid: string,
         @Param('id') convoId: string,
     ) {
+        console.log("convoId",convoId)
         const chatHistory =
             await this.convoService.getChatHistoryOfConversation(
                 convoId,
