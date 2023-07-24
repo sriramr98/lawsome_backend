@@ -5,6 +5,7 @@ import { ConvoService } from '../convo/convo.service';
 import { PineconeService } from 'src/libs/pinecone/pinecone.service';
 import { OpenaiService } from 'src/libs/openai/openai.service';
 import { AuthGuard } from '../auth/AuthGuard';
+import { LawModule } from '../law/law.module';
 
 @Module({
     providers: [
@@ -15,5 +16,6 @@ import { AuthGuard } from '../auth/AuthGuard';
         PineconeService,
         OpenaiService,
     ],
+    imports: [LawModule],
 })
 export class ChatModule {}

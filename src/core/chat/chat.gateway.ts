@@ -43,34 +43,46 @@ export class ChatGateway implements OnGatewayConnection {
         @MessageBody() payload: SocketMessage,
         @AuthorizedWsUser('uid') userId: string,
     ) {
-        console.log({ userId });
-        const { conversation_id, msg } = payload;
+        try {
+            const { conversation_id, msg } = payload;
 
-        const subscriber = await this.chatService.chat(
-            conversation_id,
-            userId,
-            msg,
-        );
+            const subscriber = await this.chatService.chat(
+                conversation_id,
+                userId,
+                msg,
+            );
 
-        let finalAnswer = '';
-        subscriber.subscribe({
-            next: (token) => {
-                client.emit('chat:resp', {
-                    msg: token,
-                    conversation_id,
-                    isLast: false,
-                });
-                finalAnswer += token;
-            },
-            complete: () => {
-                client.emit('chat:resp', {
-                    msg: finalAnswer,
-                    conversation_id,
-                    isLast: true,
-                });
-            },
-            error: (error) => this.sendErrorToClient(client, error),
-        });
+            let finalAnswer = '';
+            subscriber.subscribe({
+                next: (token) => {
+                    client.emit('chat:resp', {
+                        msg: token,
+                        conversation_id,
+                        isLast: false,
+                    });
+                    finalAnswer += token;
+                },
+                complete: async () => {
+                    try {
+                        const sources = await this.chatService.extractSources(
+                            finalAnswer,
+                        );
+                        console.log({ sources });
+                        client.emit('chat:resp', {
+                            msg: finalAnswer,
+                            conversation_id,
+                            sources,
+                            isLast: true,
+                        });
+                    } catch (ex: any) {
+                        this.sendErrorToClient(client, ex);
+                    }
+                },
+                error: (error) => this.sendErrorToClient(client, error),
+            });
+        } catch (ex: any) {
+            this.sendErrorToClient(client, ex);
+        }
     }
 
     private sendErrorToClient(client: Socket, error: any) {

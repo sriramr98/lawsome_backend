@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { Model, Table, Column, AllowNull, Index } from 'sequelize-typescript';
+import { Model, Table, Column, Index } from 'sequelize-typescript';
 
 @Table({ tableName: 'chat_messages' })
 export class Chat extends Model {
