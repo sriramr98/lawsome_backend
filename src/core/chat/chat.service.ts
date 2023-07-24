@@ -22,6 +22,7 @@ export class ChatService {
                 conversationId,
                 userId,
             );
+            console.log("chat history",chat_history)
         const context = await this.pineconeService.semanticSearch(question, 3);
 
         const structContext = context.map((c) => ({
