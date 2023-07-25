@@ -5,6 +5,9 @@ import { PineconeService } from 'src/libs/pinecone/pinecone.service';
 import { ConvoService } from '../convo/convo.service';
 import { LawService } from '../law/law.service';
 import { Law } from '../law/entities/Laws';
+import sequelize from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { Chat } from '../convo/entities/Chats';
 
 @Injectable()
 export class ChatService {
@@ -13,6 +16,7 @@ export class ChatService {
         private pineconeService: PineconeService,
         private convoService: ConvoService,
         private lawService: LawService,
+        private sequelize: Sequelize,
     ) {}
 
     async chat(
@@ -45,5 +49,33 @@ export class ChatService {
 
         const sources = await this.lawService.getLawsAndActs(matches);
         return sources;
+    }
+
+    async addQAToConversation(
+        question: string,
+        answer: string,
+        userId: string,
+        conversationId: string,
+    ) {
+        await this.sequelize.transaction(async (t) => {
+            await Chat.create(
+                {
+                    conversationId,
+                    userId,
+                    message: question,
+                    sender: 'user',
+                },
+                { transaction: t },
+            );
+            await Chat.create(
+                {
+                    conversationId,
+                    userId,
+                    message: answer,
+                    sender: 'bot',
+                },
+                { transaction: t },
+            );
+        });
     }
 }

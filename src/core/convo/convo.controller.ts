@@ -34,6 +34,7 @@ export class ConvoController {
         @AuthorizedUser('uid') userid: string,
         @Param('id') convoId: string,
     ) {
+        console.log("convoId",convoId)
         const chatHistory =
             await this.convoService.getChatHistoryOfConversation(
                 convoId,
@@ -49,6 +50,7 @@ export class ConvoController {
         @Body() convoBody: CreateConvoDto,
         @AuthorizedUser('uid') userId: string,
     ) {
-        await this.convoService.createConversation(convoBody.title, userId);
+        const reponse = await this.convoService.createConversation(convoBody.title, userId);
+        return Result.success(reponse)
     }
 }

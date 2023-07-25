@@ -14,12 +14,12 @@ export class ConvoService {
     }
 
     getChatHistoryOfConversation(
-        conversationId: string,
+        convoId: string,
         userId: string,
     ): Promise<Array<Chat>> {
         return Chat.findAll({
             where: {
-                conversationId,
+                conversationId:convoId,
                 userId,
             },
             attributes: ['id', 'message', 'sender', 'createdAt'],
@@ -27,7 +27,7 @@ export class ConvoService {
     }
 
     async createConversation(title: string, userId: string) {
-        await Conversation.create({
+       return await Conversation.create({
             title,
             userId,
         });

@@ -12,12 +12,15 @@ import { ChatService } from './chat.service';
 import { AuthGuard } from '../auth/AuthGuard';
 import { FirebaseUser } from 'src/types/FirebaseUser';
 import { AuthorizedWsUser } from '../auth/AuthorizedWsUser.decorator';
+import { Chat } from '../convo/entities/Chats';
+import { LawService } from '../law/law.service';
+import sequelize from 'sequelize';
 
 interface UserSocket extends Socket {
     user: FirebaseUser;
 }
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection {
     constructor(
         private chatService: ChatService,
@@ -26,11 +29,14 @@ export class ChatGateway implements OnGatewayConnection {
 
     async handleConnection(client: UserSocket) {
         console.log('client connected');
-        const authToken = client.handshake.headers.authorization;
+        const handshake = client.handshake;
+        const authToken =
+            handshake.auth.authorization || handshake.headers.authorization;
 
         try {
             const user = await this.authGuard.validateToken(authToken, 'ws');
             client.user = user;
+            console.log('user authenticated');
         } catch (ex: any) {
             this.sendErrorToClient(client, ex);
             client.disconnect(true);
@@ -43,46 +49,45 @@ export class ChatGateway implements OnGatewayConnection {
         @MessageBody() payload: SocketMessage,
         @AuthorizedWsUser('uid') userId: string,
     ) {
-        try {
-            const { conversation_id, msg } = payload;
+        console.log('payload from socket', payload);
+        const { conversation_id, msg } = payload;
+        const subscriber = await this.chatService.chat(
+            conversation_id,
+            userId,
+            msg,
+        );
 
-            const subscriber = await this.chatService.chat(
-                conversation_id,
-                userId,
-                msg,
-            );
+        let finalAnswer = '';
+        subscriber.subscribe({
+            next: (token) => {
+                client.emit('chat:resp', {
+                    msg: token,
+                    conversation_id,
+                    isLast: false,
+                });
+                finalAnswer += token;
+            },
+            complete: async () => {
+                const sources = await this.chatService.extractSources(
+                    finalAnswer,
+                );
 
-            let finalAnswer = '';
-            subscriber.subscribe({
-                next: (token) => {
-                    client.emit('chat:resp', {
-                        msg: token,
-                        conversation_id,
-                        isLast: false,
-                    });
-                    finalAnswer += token;
-                },
-                complete: async () => {
-                    try {
-                        const sources = await this.chatService.extractSources(
-                            finalAnswer,
-                        );
-                        console.log({ sources });
-                        client.emit('chat:resp', {
-                            msg: finalAnswer,
-                            conversation_id,
-                            sources,
-                            isLast: true,
-                        });
-                    } catch (ex: any) {
-                        this.sendErrorToClient(client, ex);
-                    }
-                },
-                error: (error) => this.sendErrorToClient(client, error),
-            });
-        } catch (ex: any) {
-            this.sendErrorToClient(client, ex);
-        }
+                client.emit('chat:resp', {
+                    msg: finalAnswer,
+                    conversation_id,
+                    sources,
+                    isLast: true,
+                });
+
+                await this.chatService.addQAToConversation(
+                    msg,
+                    finalAnswer,
+                    userId,
+                    conversation_id,
+                );
+            },
+            error: (error) => this.sendErrorToClient(client, error),
+        });
     }
 
     private sendErrorToClient(client: Socket, error: any) {
