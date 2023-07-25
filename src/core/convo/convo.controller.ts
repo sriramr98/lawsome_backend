@@ -50,6 +50,7 @@ export class ConvoController {
         @Body() convoBody: CreateConvoDto,
         @AuthorizedUser('uid') userId: string,
     ) {
-        await this.convoService.createConversation(convoBody.title, userId);
+        const reponse = await this.convoService.createConversation(convoBody.title, userId);
+        return Result.success(reponse)
     }
 }
