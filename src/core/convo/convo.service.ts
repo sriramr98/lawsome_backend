@@ -27,7 +27,7 @@ export class ConvoService {
     }
 
     async createConversation(title: string, userId: string) {
-        await Conversation.create({
+       return await Conversation.create({
             title,
             userId,
         });
