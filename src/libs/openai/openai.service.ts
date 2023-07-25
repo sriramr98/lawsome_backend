@@ -4,8 +4,13 @@ import { LLMChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Chat } from 'src/core/convo/entities/Chats';
 import { QuestionContext } from 'src/types/QuestionContext';
-import { QA_PROMPT } from './prompts';
+import { QA_PROMPT, QUESTION_PROMPT } from './prompts';
 import { Observable } from 'rxjs';
+import {
+    AIMessagePromptTemplate,
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+} from 'langchain/prompts';
 
 interface TokenCallback {
     onNewToken(token: string): void;
@@ -14,6 +19,7 @@ interface TokenCallback {
 @Injectable()
 export class OpenaiService implements OnModuleInit {
     private openai: ChatOpenAI;
+    private openAiNonStream: ChatOpenAI;
 
     constructor(private configService: ConfigService) {}
 
@@ -35,7 +41,39 @@ export class OpenaiService implements OnModuleInit {
                 ...config,
                 streaming: true,
             });
+
+            this.openAiNonStream = new ChatOpenAI({
+                ...config,
+                streaming: false,
+            });
         }
+    }
+
+    async prepareQuestion(
+        question: string,
+        chat_history: Array<Chat>,
+    ): Promise<string> {
+        const formattedChatHistory =
+            this.formatChatHistoryForPrompt(chat_history);
+
+        const questionPrompt =
+            HumanMessagePromptTemplate.fromTemplate(`Question: {question}`);
+
+        const prompt = ChatPromptTemplate.fromPromptMessages([
+            QUESTION_PROMPT,
+            ...formattedChatHistory,
+            questionPrompt,
+        ]);
+
+        const chain = new LLMChain({
+            llm: this.openAiNonStream,
+            prompt: prompt,
+        });
+
+        return await chain.predict({
+            question,
+            conversationHistory: formattedChatHistory,
+        });
     }
 
     ask(
@@ -43,26 +81,33 @@ export class OpenaiService implements OnModuleInit {
         context: Array<QuestionContext>,
         chat_history: Array<Chat>,
     ): Observable<string> {
-        const chain = new LLMChain({
-            llm: this.openai,
-            prompt: QA_PROMPT,
-        });
+        const formattedChatHistory =
+            this.formatChatHistoryForPrompt(chat_history);
+
+        const currentQuestionPrompt = HumanMessagePromptTemplate.fromTemplate(
+            `Sources: \n --- {sources} --- \n Question: {question}`,
+        );
 
         const formattedContext = context
-            .map(
-                (c) =>
-                    `${c.metadata['db_id']} : ${c.content}`,
-            )
+            .map((c) => `Source: ${c.metadata['db_id']} \n ${c.content}`)
             .join('\n----\n');
 
-        console.log({ formattedContext });
+        const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+            QA_PROMPT,
+            ...formattedChatHistory,
+            currentQuestionPrompt,
+        ]);
+
+        const chain = new LLMChain({
+            llm: this.openai,
+            prompt: chatPrompt,
+        });
 
         return new Observable((subscriber) => {
             chain.call(
                 {
-                    question,
                     sources: formattedContext,
-                    conversationHistory: chat_history,
+                    question,
                 },
                 [
                     {
@@ -72,6 +117,18 @@ export class OpenaiService implements OnModuleInit {
                     },
                 ],
             );
+        });
+    }
+
+    private formatChatHistoryForPrompt(
+        chat_history: Array<Chat>,
+    ): (HumanMessagePromptTemplate | AIMessagePromptTemplate)[] {
+        return chat_history.map((chat) => {
+            if (chat.sender === 'user') {
+                return HumanMessagePromptTemplate.fromTemplate(chat.message);
+            } else {
+                return AIMessagePromptTemplate.fromTemplate(chat.message);
+            }
         });
     }
 }

@@ -29,7 +29,22 @@ export class ChatService {
                 conversationId,
                 userId,
             );
-        const context = await this.pineconeService.semanticSearch(question, 3);
+
+        let searchQuery = await this.openaiService.prepareQuestion(
+            question,
+            chat_history,
+        );
+
+        if (searchQuery.startsWith('Search Query:')) {
+            // Remove Search Query: from the string
+            searchQuery = searchQuery.split('Search Query:')[1].trim();
+        }
+
+        console.log({ searchQuery });
+        const context = await this.pineconeService.semanticSearch(
+            searchQuery,
+            3,
+        );
 
         const structContext = context.map((c) => ({
             content: c.pageContent,
