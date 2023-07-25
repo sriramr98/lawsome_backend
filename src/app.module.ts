@@ -10,6 +10,7 @@ import { FirebaseModule } from './core/common/firebase.module';
 import { LawModule } from './core/law/law.module';
 import { Act } from './core/law/entities/Acts';
 import { Law } from './core/law/entities/Laws';
+import { HealthModule } from './core/health/health.module';
 
 @Module({
     imports: [
@@ -41,6 +42,7 @@ import { Law } from './core/law/entities/Laws';
         ConvoModule,
         ChatModule,
         LawModule,
+        HealthModule,
     ],
     controllers: [],
     providers: [],
