@@ -47,16 +47,14 @@ export class ChatGateway implements OnGatewayConnection {
         @MessageBody() payload: SocketMessage,
         @AuthorizedWsUser('uid') userId: string,
     ) {
-
-       
-        console.log("payload from socket",payload);
-        const { conversation_id, msg } = payload;
-        Chat.create({
-            conversationId:conversation_id,
-            userId,
-            message:msg,
-            sender:'user'
-        })
+        try {
+            const { conversation_id, msg } = payload;
+            Chat.create({
+                conversationId:conversation_id,
+                userId,
+                message:msg,
+                sender:'user'
+            })
         const subscriber = await this.chatService.chat(
             conversation_id,
             userId,
@@ -73,10 +71,16 @@ export class ChatGateway implements OnGatewayConnection {
                 });
                 finalAnswer += token;
             },
-            complete: () => {
+            complete:async () => {
+                try {
+                    const sources = await this.chatService.extractSources(
+                        finalAnswer,
+                    );
+                    console.log({ sources });
                 client.emit('chat:resp', {
                     msg: finalAnswer,
                     conversation_id,
+                    sources,
                     isLast: true,
                 });
                 Chat.create({
@@ -85,9 +89,15 @@ export class ChatGateway implements OnGatewayConnection {
                     message:finalAnswer,
                     sender:'bot'
                 })
+            } catch (ex: any) {
+                this.sendErrorToClient(client, ex);
+            }
             },
             error: (error) => this.sendErrorToClient(client, error),
         });
+    } catch (ex: any) {
+        this.sendErrorToClient(client, ex);
+    }
     }
 
     private sendErrorToClient(client: Socket, error: any) {

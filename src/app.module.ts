@@ -6,9 +6,10 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Conversation } from './core/convo/entities/Conversation';
 import { Chat } from './core/convo/entities/Chats';
 import { ChatModule } from './core/chat/chat.module';
-import { OpenaiService } from './libs/openai/openai.service';
-import { Firebase } from './core/common/firebase.service';
 import { FirebaseModule } from './core/common/firebase.module';
+import { LawModule } from './core/law/law.module';
+import { Act } from './core/law/entities/Acts';
+import { Law } from './core/law/entities/Laws';
 
 @Module({
     imports: [
@@ -27,7 +28,7 @@ import { FirebaseModule } from './core/common/firebase.module';
                 sync: {
                     alter: configService.get<string>('env') === 'development',
                 },
-                models: [Conversation, Chat],
+                models: [Conversation, Chat, Act, Law],
                 dialectOptions: {
                     ssl: {
                         rejectUnauthorized:
@@ -39,6 +40,7 @@ import { FirebaseModule } from './core/common/firebase.module';
         FirebaseModule,
         ConvoModule,
         ChatModule,
+        LawModule,
     ],
     controllers: [],
     providers: [],

@@ -51,7 +51,7 @@ export class OpenaiService implements OnModuleInit {
         const formattedContext = context
             .map(
                 (c) =>
-                    `${c.metadata['act_id']}-${c.metadata['db_id']} : ${c.content}`,
+                    `${c.metadata['db_id']} : ${c.content}`,
             )
             .join('\n----\n');
 
