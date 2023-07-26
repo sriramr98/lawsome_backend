@@ -12,10 +12,6 @@ import {
     HumanMessagePromptTemplate,
 } from 'langchain/prompts';
 
-interface TokenCallback {
-    onNewToken(token: string): void;
-}
-
 @Injectable()
 export class OpenaiService implements OnModuleInit {
     private openai: ChatOpenAI;
@@ -26,25 +22,28 @@ export class OpenaiService implements OnModuleInit {
     async onModuleInit() {
         if (!this.openai) {
             const config = {
-                azureOpenAIApiKey:
-                    this.configService.get<string>('ai.azureApiKey'),
-                azureOpenAIApiDeploymentName: this.configService.get<string>(
-                    'ai.azureApiDeploymentName',
-                ),
-                azureOpenAIApiVersion:
-                    this.configService.get<string>('ai.azureApiVersion'),
-                azureOpenAIApiInstanceName: this.configService.get<string>(
-                    'ai.azureApiInstanceName',
-                ),
+                // azureOpenAIApiKey:
+                //     this.configService.get<string>('ai.azureApiKey'),
+                // azureOpenAIApiDeploymentName: this.configService.get<string>(
+                //     'ai.azureApiDeploymentName',
+                // ),
+                // azureOpenAIApiVersion:
+                //     this.configService.get<string>('ai.azureApiVersion'),
+                // azureOpenAIApiInstanceName: this.configService.get<string>(
+                //     'ai.azureApiInstanceName',
+                // ),
+                openAIApiKey: this.configService.get<string>('ai.openaiApiKey'),
             };
             this.openai = new ChatOpenAI({
                 ...config,
                 streaming: true,
+                modelName: 'gpt-4-0613',
             });
 
             this.openAiNonStream = new ChatOpenAI({
                 ...config,
                 streaming: false,
+                modelName: 'gpt-3.5-turbo',
             });
         }
     }
