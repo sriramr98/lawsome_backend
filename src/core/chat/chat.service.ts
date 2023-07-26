@@ -5,9 +5,10 @@ import { PineconeService } from 'src/libs/pinecone/pinecone.service';
 import { ConvoService } from '../convo/convo.service';
 import { LawService } from '../law/law.service';
 import { Law } from '../law/entities/Laws';
-import sequelize from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import { Chat } from '../convo/entities/Chats';
+import { Chat } from './entities/Chats';
+import { Act } from '../law/entities/Acts';
+import { Source } from './entities/Source';
 
 @Injectable()
 export class ChatService {
@@ -24,11 +25,10 @@ export class ChatService {
         userId: string,
         question: string,
     ): Promise<Observable<string>> {
-        const chat_history =
-            await this.convoService.getChatHistoryOfConversation(
-                conversationId,
-                userId,
-            );
+        const chat_history = await this.getChatHistoryOfConversation(
+            conversationId,
+            userId,
+        );
 
         let searchQuery = await this.openaiService.prepareQuestion(
             question,
@@ -71,6 +71,7 @@ export class ChatService {
         answer: string,
         userId: string,
         conversationId: string,
+        sources: Array<Law>,
     ) {
         await this.sequelize.transaction(async (t) => {
             await Chat.create(
@@ -82,7 +83,7 @@ export class ChatService {
                 },
                 { transaction: t },
             );
-            await Chat.create(
+            const resp = await Chat.create(
                 {
                     conversationId,
                     userId,
@@ -91,6 +92,45 @@ export class ChatService {
                 },
                 { transaction: t },
             );
+
+            for (let source of sources) {
+                await Source.create(
+                    {
+                        chat_id: resp.id,
+                        law_id: source.id,
+                    },
+                    { transaction: t },
+                );
+            }
+        });
+    }
+
+    async getChatHistoryOfConversation(
+        convoId: string,
+        userId: string,
+        limit: number = 10,
+        offset: number = 0,
+        includeSources: boolean = true,
+    ): Promise<Array<Chat>> {
+        return Chat.findAll({
+            where: {
+                conversationId: convoId,
+                userId,
+            },
+            attributes: ['id', 'message', 'sender', 'createdAt'],
+            limit,
+            offset,
+            order: [['createdAt', 'DESC']],
+            include: includeSources
+                ? [{ model: Source, include: [{ model: Law, include: [Act] }] }]
+                : [],
+        });
+    }
+
+    async addSources(chatId: number, sources: Array<Law>) {
+        await this.sequelize.transaction(async (t) => {
+            for (const source of sources) {
+            }
         });
     }
 }
