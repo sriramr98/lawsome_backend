@@ -6,6 +6,7 @@ import { PineconeService } from 'src/libs/pinecone/pinecone.service';
 import { OpenaiService } from 'src/libs/openai/openai.service';
 import { AuthGuard } from '../auth/AuthGuard';
 import { LawModule } from '../law/law.module';
+import { ChatController } from './chat.controller';
 
 @Module({
     providers: [
@@ -18,5 +19,6 @@ import { LawModule } from '../law/law.module';
     ],
     imports: [LawModule],
     exports: [ChatService],
+    controllers: [ChatController],
 })
 export class ChatModule {}

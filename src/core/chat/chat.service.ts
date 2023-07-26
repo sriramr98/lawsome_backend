@@ -9,13 +9,14 @@ import { Sequelize } from 'sequelize-typescript';
 import { Chat } from './entities/Chats';
 import { Act } from '../law/entities/Acts';
 import { Source } from './entities/Source';
+import { Feedback } from './entities/Feedback';
+import { FeedbackType } from './models/FeedbackType';
 
 @Injectable()
 export class ChatService {
     constructor(
         private openaiService: OpenaiService,
         private pineconeService: PineconeService,
-        private convoService: ConvoService,
         private lawService: LawService,
         private sequelize: Sequelize,
     ) {}
@@ -117,7 +118,7 @@ export class ChatService {
                 conversationId: convoId,
                 userId,
             },
-            attributes: ['id', 'message', 'sender', 'createdAt'],
+            attributes: ['id', 'message', 'sender', 'likeStatus', 'createdAt'],
             limit,
             offset,
             order: [['createdAt', 'DESC']],
@@ -127,9 +128,36 @@ export class ChatService {
         });
     }
 
-    async addSources(chatId: number, sources: Array<Law>) {
+    async addFeedback(
+        chatId: number,
+        userId: string,
+        isLiked: boolean,
+        feedback?: string,
+    ): Promise<void> {
         await this.sequelize.transaction(async (t) => {
-            for (const source of sources) {
+            const likeStatus = isLiked
+                ? FeedbackType.LIKE
+                : FeedbackType.DISLIKE;
+
+            await Chat.update(
+                { likeStatus },
+                {
+                    where: {
+                        id: chatId,
+                        userId,
+                    },
+                    transaction: t,
+                },
+            );
+
+            if (feedback) {
+                await Feedback.create(
+                    {
+                        chat_id: chatId,
+                        feedback,
+                    },
+                    { transaction: t },
+                );
             }
         });
     }
