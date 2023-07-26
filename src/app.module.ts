@@ -1,9 +1,8 @@
-import { HttpException, Module } from '@nestjs/common';
-import { SentryModule } from '@ntegral/nestjs-sentry';
+import { HttpException, MiddlewareConsumer, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { SentryInterceptor } from '@ntegral/nestjs-sentry';
+import { LoggerModule } from 'nestjs-pino';
 
 import config from './config/config';
 import { ConvoModule } from './core/convo/convo.module';
@@ -15,17 +14,19 @@ import { LawModule } from './core/law/law.module';
 import { Act } from './core/law/entities/Acts';
 import { Law } from './core/law/entities/Laws';
 import { HealthModule } from './core/health/health.module';
+import { SentryInterceptor } from './libs/SentryInterceptor';
 
 @Module({
     imports: [
-        SentryModule.forRootAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                dsn: configService.get<string>('sentry.dsn'),
-                debug: configService.get<string>('env') === 'development',
-                environment: configService.get<string>('env'),
-            }),
+        LoggerModule.forRoot({
+            pinoHttp: {
+                transport: {
+                    target: 'pino-pretty',
+                    options: {
+                        singleLine: true,
+                    },
+                },
+            },
         }),
         ConfigModule.forRoot({ isGlobal: true, load: [config] }),
         SequelizeModule.forRootAsync({
@@ -61,16 +62,7 @@ import { HealthModule } from './core/health/health.module';
     providers: [
         {
             provide: APP_INTERCEPTOR,
-            useFactory: () =>
-                new SentryInterceptor({
-                    filters: [
-                        {
-                            type: HttpException,
-                            filter: (exception: HttpException) =>
-                                500 >= exception.getStatus(), // Only report 500 errors
-                        },
-                    ],
-                }),
+            useFactory: () => new SentryInterceptor(),
         },
     ],
     exports: [],
