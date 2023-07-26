@@ -21,4 +21,7 @@ export default () => ({
         azureApiVersion: process.env.AZURE_OPENAI_API_VERSION,
         azureApiInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
     },
+    sentry: {
+        dsn: process.env.SENTRY_DSN,
+    },
 });

@@ -1,8 +1,12 @@
-import { Module } from '@nestjs/common';
-import { ConvoModule } from './core/convo/convo.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from './config/config';
+import { HttpException, Module } from '@nestjs/common';
+import { SentryModule } from '@ntegral/nestjs-sentry';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SentryInterceptor } from '@ntegral/nestjs-sentry';
+
+import config from './config/config';
+import { ConvoModule } from './core/convo/convo.module';
 import { Conversation } from './core/convo/entities/Conversation';
 import { Chat } from './core/convo/entities/Chats';
 import { ChatModule } from './core/chat/chat.module';
@@ -14,6 +18,15 @@ import { HealthModule } from './core/health/health.module';
 
 @Module({
     imports: [
+        SentryModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                dsn: configService.get<string>('sentry.dsn'),
+                debug: configService.get<string>('env') === 'development',
+                environment: configService.get<string>('env'),
+            }),
+        }),
         ConfigModule.forRoot({ isGlobal: true, load: [config] }),
         SequelizeModule.forRootAsync({
             imports: [ConfigModule],
@@ -45,7 +58,21 @@ import { HealthModule } from './core/health/health.module';
         HealthModule,
     ],
     controllers: [],
-    providers: [],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useFactory: () =>
+                new SentryInterceptor({
+                    filters: [
+                        {
+                            type: HttpException,
+                            filter: (exception: HttpException) =>
+                                500 >= exception.getStatus(), // Only report 500 errors
+                        },
+                    ],
+                }),
+        },
+    ],
     exports: [],
 })
 export class AppModule {}

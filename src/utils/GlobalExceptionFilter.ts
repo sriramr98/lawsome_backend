@@ -5,7 +5,7 @@ import {
     HttpException,
     HttpStatus,
 } from '@nestjs/common';
-import { HttpArgumentsHost, WsArgumentsHost } from '@nestjs/common/interfaces';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Response } from 'express';
 import AppError from 'src/types/AppError';
 import Result from 'src/types/Result';

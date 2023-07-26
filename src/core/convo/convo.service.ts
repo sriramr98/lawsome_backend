@@ -19,7 +19,7 @@ export class ConvoService {
     ): Promise<Array<Chat>> {
         return Chat.findAll({
             where: {
-                conversationId:convoId,
+                conversationId: convoId,
                 userId,
             },
             attributes: ['id', 'message', 'sender', 'createdAt'],
@@ -27,7 +27,7 @@ export class ConvoService {
     }
 
     async createConversation(title: string, userId: string) {
-       return await Conversation.create({
+        return await Conversation.create({
             title,
             userId,
         });
