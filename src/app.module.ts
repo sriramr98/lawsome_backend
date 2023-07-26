@@ -1,8 +1,11 @@
-import { Module } from '@nestjs/common';
-import { ConvoModule } from './core/convo/convo.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from './config/config';
+import { HttpException, MiddlewareConsumer, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggerModule } from 'nestjs-pino';
+
+import config from './config/config';
+import { ConvoModule } from './core/convo/convo.module';
 import { Conversation } from './core/convo/entities/Conversation';
 import { Chat } from './core/convo/entities/Chats';
 import { ChatModule } from './core/chat/chat.module';
@@ -11,9 +14,20 @@ import { LawModule } from './core/law/law.module';
 import { Act } from './core/law/entities/Acts';
 import { Law } from './core/law/entities/Laws';
 import { HealthModule } from './core/health/health.module';
+import { SentryInterceptor } from './libs/SentryInterceptor';
 
 @Module({
     imports: [
+        LoggerModule.forRoot({
+            pinoHttp: {
+                transport: {
+                    target: 'pino-pretty',
+                    options: {
+                        singleLine: true,
+                    },
+                },
+            },
+        }),
         ConfigModule.forRoot({ isGlobal: true, load: [config] }),
         SequelizeModule.forRootAsync({
             imports: [ConfigModule],
@@ -45,7 +59,12 @@ import { HealthModule } from './core/health/health.module';
         HealthModule,
     ],
     controllers: [],
-    providers: [],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useFactory: () => new SentryInterceptor(),
+        },
+    ],
     exports: [],
 })
 export class AppModule {}
