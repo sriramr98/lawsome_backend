@@ -17,5 +17,6 @@ import { LawModule } from '../law/law.module';
         OpenaiService,
     ],
     imports: [LawModule],
+    exports: [ChatService],
 })
 export class ChatModule {}

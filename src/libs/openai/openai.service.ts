@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LLMChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { Chat } from 'src/core/convo/entities/Chats';
+import { Chat } from 'src/core/chat/entities/Chats';
 import { QuestionContext } from 'src/types/QuestionContext';
 import { QA_PROMPT, QUESTION_PROMPT } from './prompts';
 import { Observable } from 'rxjs';

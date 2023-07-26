@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Conversation } from './entities/Conversation';
-import { Chat } from './entities/Chats';
 
 @Injectable()
 export class ConvoService {
@@ -10,19 +9,6 @@ export class ConvoService {
                 userId,
             },
             attributes: ['id', 'title', 'createdAt', 'updatedAt'],
-        });
-    }
-
-    getChatHistoryOfConversation(
-        convoId: string,
-        userId: string,
-    ): Promise<Array<Chat>> {
-        return Chat.findAll({
-            where: {
-                conversationId: convoId,
-                userId,
-            },
-            attributes: ['id', 'message', 'sender', 'createdAt'],
         });
     }
 

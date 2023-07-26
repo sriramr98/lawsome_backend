@@ -14,8 +14,3 @@ CREATE TABLE laws (
     law_id VARCHAR(100) NOT NULL,
     law_type VARCHAR(20) NOT NULL
 );
-SELECT COUNT(1)
-FROM laws;
-SELECT *
-FROM laws
-LIMIT 5;

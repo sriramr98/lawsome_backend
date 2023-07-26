@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
-import { Model, Table, Column, Index } from 'sequelize-typescript';
+import { Model, Table, Column, Index, HasMany } from 'sequelize-typescript';
+import { Source } from './Source';
 
 @Table({ tableName: 'chat_messages' })
 export class Chat extends Model {
@@ -16,4 +17,7 @@ export class Chat extends Model {
 
     @Column(DataTypes.TEXT)
     message: string;
+
+    @HasMany(() => Source)
+    sources: Array<Source>;
 }

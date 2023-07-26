@@ -5,8 +5,10 @@ import {
     Column,
     ForeignKey,
     BelongsTo,
+    HasMany,
 } from 'sequelize-typescript';
 import { Act } from './Acts';
+import { Source } from 'src/core/chat/entities/Source';
 
 @Table({ tableName: 'laws', timestamps: false })
 export class Law extends Model {

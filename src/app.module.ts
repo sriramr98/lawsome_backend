@@ -7,14 +7,16 @@ import { LoggerModule } from 'nestjs-pino';
 import config from './config/config';
 import { ConvoModule } from './core/convo/convo.module';
 import { Conversation } from './core/convo/entities/Conversation';
-import { Chat } from './core/convo/entities/Chats';
+import { Chat } from './core/chat/entities/Chats';
 import { ChatModule } from './core/chat/chat.module';
 import { FirebaseModule } from './core/common/firebase.module';
 import { LawModule } from './core/law/law.module';
 import { Act } from './core/law/entities/Acts';
 import { Law } from './core/law/entities/Laws';
 import { HealthModule } from './core/health/health.module';
+import { Source } from './core/chat/entities/Source';
 import { SentryInterceptor } from './libs/SentryInterceptor';
+
 
 @Module({
     imports: [
@@ -43,7 +45,7 @@ import { SentryInterceptor } from './libs/SentryInterceptor';
                 sync: {
                     alter: configService.get<string>('env') === 'development',
                 },
-                models: [Conversation, Chat, Act, Law],
+                models: [Conversation, Chat, Act, Law, Source],
                 dialectOptions: {
                     ssl: {
                         rejectUnauthorized:

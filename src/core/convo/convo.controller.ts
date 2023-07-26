@@ -6,6 +6,7 @@ import {
     HttpStatus,
     Param,
     Post,
+    Query,
     UseGuards,
     UsePipes,
     ValidationPipe,
@@ -15,11 +16,15 @@ import Result from 'src/types/Result';
 import { AuthorizedUser } from 'src/core/auth/AuthorizedHttpUser.decorator';
 import { ConvoService } from './convo.service';
 import { AuthGuard } from '../auth/AuthGuard';
+import { ChatService } from '../chat/chat.service';
 
 @Controller('convo')
 @UseGuards(AuthGuard)
 export class ConvoController {
-    constructor(private convoService: ConvoService) {}
+    constructor(
+        private convoService: ConvoService,
+        private chatService: ChatService,
+    ) {}
 
     @Get()
     @HttpCode(HttpStatus.OK)
@@ -33,13 +38,16 @@ export class ConvoController {
     async getChatHistory(
         @AuthorizedUser('uid') userid: string,
         @Param('id') convoId: string,
+        @Query('page') page: number,
+        @Query('limit') limit: number,
     ) {
-        console.log("convoId",convoId)
-        const chatHistory =
-            await this.convoService.getChatHistoryOfConversation(
-                convoId,
-                userid,
-            );
+        console.log('convoId', convoId);
+        const chatHistory = await this.chatService.getChatHistoryOfConversation(
+            convoId,
+            userid,
+            limit,
+            page,
+        );
 
         return Result.success(chatHistory);
     }
@@ -50,7 +58,10 @@ export class ConvoController {
         @Body() convoBody: CreateConvoDto,
         @AuthorizedUser('uid') userId: string,
     ) {
-        const reponse = await this.convoService.createConversation(convoBody.title, userId);
-        return Result.success(reponse)
+        const reponse = await this.convoService.createConversation(
+            convoBody.title,
+            userId,
+        );
+        return Result.success(reponse);
     }
 }

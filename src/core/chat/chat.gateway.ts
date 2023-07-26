@@ -4,7 +4,6 @@ import {
     OnGatewayConnection,
     SubscribeMessage,
     WebSocketGateway,
-    WsException,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { SocketMessage } from './types/SocketMessage';
@@ -12,9 +11,6 @@ import { ChatService } from './chat.service';
 import { AuthGuard } from '../auth/AuthGuard';
 import { FirebaseUser } from 'src/types/FirebaseUser';
 import { AuthorizedWsUser } from '../auth/AuthorizedWsUser.decorator';
-import { Chat } from '../convo/entities/Chats';
-import { LawService } from '../law/law.service';
-import sequelize from 'sequelize';
 
 interface UserSocket extends Socket {
     user: FirebaseUser;
@@ -84,6 +80,7 @@ export class ChatGateway implements OnGatewayConnection {
                     finalAnswer,
                     userId,
                     conversation_id,
+                    sources,
                 );
             },
             error: (error) => this.sendErrorToClient(client, error),
