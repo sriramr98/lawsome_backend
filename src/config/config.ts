@@ -20,6 +20,7 @@ export default () => ({
         azureApiDeploymentName: process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME,
         azureApiVersion: process.env.AZURE_OPENAI_API_VERSION,
         azureApiInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
+        openaiApiKey: process.env.OPENAI_API_KEY,
     },
     sentry: {
         dsn: process.env.SENTRY_DSN,
