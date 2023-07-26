@@ -22,28 +22,16 @@ Give 2 lines of space between each paragraph of your answer to format it nicely.
 REMEMBER: DO NOT ASK THE JUNIOR LAWYER TO SEEK THE ADVICE OF A LEGAL PROFESSIONAL SINCE YOU ARE A LEGAL PROFESSIONAL.`);
 
 export const QUESTION_PROMPT =
-    SystemMessagePromptTemplate.fromTemplate(`Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a knowledge base about indian law.
-Generate a search query based on the conversation and the new question. 
-Do not include cited sources e.g [1234] in the search query terms.
-Do not include any text inside [] or <<>> in the search query terms.
-Do not include any special characters like '+'.
-If the question is not in English, translate the question to English before generating the search query.
-If you cannot generate a search query, return just the original question. 
-ONLY RETURN A SEARCH QUERY. DO NOT EXTEND THE ANSWER WITH MORE QUESTIONS, ANSWERS OR CONVERSATION HISTORY
-
----
-Example without conversation history: 
-
-Question: I have a client who is on trial for murder. He says he wasn't in his house where his wife was murdered and he has proof of concert tickets at the same time, but the police still arrested him, 
-Search Query: murder trial india alibi proof
----
-
-Example with conversation history
-Conversation History: 
-Question: I have a client who is on trial for murder. He says he wasn't in his house where his wife was murdered and he has proof of concert tickets at the same time, but the police still arrested him, 
-Answer: Some Answer
-Question: What kind of a sentence will he get if found guilty?
-
-Search Query: indian law murder sentence punishment
----
+    SystemMessagePromptTemplate.fromTemplate(`Given the following user prompt and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base.
+    You should follow the following rules when generating and answer:
+    - Always prioritize the user prompt over the conversation log.
+    - Ignore any conversation log that is not directly related to the user prompt.
+    - Only attempt to answer if a question was posed.
+    - The question should be a single sentence.
+    - You should remove any punctuation from the question.
+    - You should remove any words that are not relevant to the question.
+    - If you are unable to formulate a question, respond with the same USER PROMPT you got.
+    - Do not include cited sources e.g [1234] in the search query terms.
+    - Do not include any text inside [] or <<>> in the search query terms.
+    - Do not include any special characters like '+'.
 `);
