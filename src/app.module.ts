@@ -1,4 +1,4 @@
-import { HttpException, MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -16,7 +16,7 @@ import { Law } from './core/law/entities/Laws';
 import { HealthModule } from './core/health/health.module';
 import { Source } from './core/chat/entities/Source';
 import { SentryInterceptor } from './libs/SentryInterceptor';
-
+import { Feedback } from './core/chat/entities/Feedback';
 
 @Module({
     imports: [
@@ -45,13 +45,14 @@ import { SentryInterceptor } from './libs/SentryInterceptor';
                 sync: {
                     alter: configService.get<string>('env') === 'development',
                 },
-                models: [Conversation, Chat, Act, Law, Source],
+                models: [Conversation, Chat, Act, Law, Source, Feedback],
                 dialectOptions: {
                     ssl: {
                         rejectUnauthorized:
                             configService.get<string>('env') === 'production',
                     },
                 },
+                logging: false,
             }),
         }),
         FirebaseModule,

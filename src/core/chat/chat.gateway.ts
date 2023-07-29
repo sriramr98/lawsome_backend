@@ -71,7 +71,9 @@ export class ChatGateway implements OnGatewayConnection {
                 client.emit('chat:resp', {
                     msg: finalAnswer,
                     conversation_id,
-                    sources,
+                    sources: sources.map((s) => ({
+                        law: s,
+                    })),
                     isLast: true,
                 });
 

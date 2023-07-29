@@ -33,6 +33,7 @@ export class OpenaiService implements OnModuleInit {
                 //     'ai.azureApiInstanceName',
                 // ),
                 openAIApiKey: this.configService.get<string>('ai.openaiApiKey'),
+                verbose: true,
             };
             this.openai = new ChatOpenAI({
                 ...config,
