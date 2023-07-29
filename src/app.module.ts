@@ -1,4 +1,4 @@
-import { HttpException, MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -52,6 +52,7 @@ import { Feedback } from './core/chat/entities/Feedback';
                             configService.get<string>('env') === 'production',
                     },
                 },
+                logging: false,
             }),
         }),
         FirebaseModule,
